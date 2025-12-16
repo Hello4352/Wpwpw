@@ -1,0 +1,74 @@
+import matplotlib.pyplot as plt
+import math
+
+points = []
+
+def calculate_distance(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+def on_click(event):
+    if event.xdata is None or event.ydata is None:
+        return
+
+    # 이미 두 점이 찍혔을 경우, 화면을 초기화하기 전에 데이터를 지웁니다.
+    if len(points) == 2:
+        plt.clf()  # 화면을 지웁니다.
+        setup_plot() # 초기 그래프 설정을 다시 합니다.
+
+    ix, iy = round(event.xdata, 1), round(event.ydata, 1)
+    
+    # 중복 클릭 방지를 위해 동일 위치 클릭은 건너뛸 수 있으나, 여기서는 단순화
+    points.append((ix, iy))
+
+    plt.plot(ix, iy, 'ro')
+    plt.text(ix + 0.5, iy + 0.5, f'({ix}, {iy})', fontsize=10)
+    plt.title(f"Point: ({ix}, {iy})")
+
+    if len(points) == 2:
+        p1 = points[0]
+        p2 = points[1]
+
+        plt.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-', linewidth=2)
+
+        dist = calculate_distance(p1, p2)
+
+        mid_x = (p1[0] + p2[0]) / 2
+        mid_y = (p1[1] + p2[1]) / 2
+
+        plt.text(mid_x, mid_y, f'Distance: {dist:.2f}',
+                 color='blue', fontsize=15, fontweight='bold',
+                 bbox=dict(facecolor='white', alpha=0.8))
+
+        plt.title(f"Distance: {dist:.2f} (Click again to reset)")
+        
+        # 계산이 끝났으므로, 다음 클릭을 위해 리스트를 비웁니다.
+        points.clear()
+
+    plt.draw()
+
+def setup_plot():
+    limit = 10
+    plt.xlim(-limit, limit)
+    plt.ylim(-limit, limit)
+    plt.axhline(0, color='black', linewidth=1)
+    plt.axvline(0, color='black', linewidth=1)
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.xlabel("X - axis")
+    plt.ylabel("Y - axis")
+    
+def main():
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    setup_plot()
+    
+    # 초기 제목 설정
+    ax.set_title("Click two points!")
+
+    fig.canvas.mpl_connect('button_press_event', on_click)
+
+    plt.show()
+
+if __name__ == "__main__":
+    main()
